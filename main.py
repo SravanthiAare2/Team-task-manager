@@ -74,7 +74,7 @@ class Task(db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return db.session.get(User, int(user_id))
 
 
 # ================= HOME =================
@@ -127,22 +127,33 @@ def register():
 def login():
     if request.method == 'POST':
 
-        email = request.form['email']
-        password = request.form['password']
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        if not email or not password:
+            flash("Fill all fields")
+            return redirect('/login')
 
         user = User.query.filter_by(email=email).first()
 
-        if user and check_password_hash(user.password, password):
-            login_user(user)
-            flash("Login successful")
+        if user is None:
+            flash("User not found")
+            return redirect('/login')
 
-            if user.role == "admin":
-                return redirect('/admin_dashboard')
-            return redirect('/dashboard')
+        if not check_password_hash(user.password, password):
+            flash("Wrong password")
+            return redirect('/login')
 
-        flash("Invalid credentials")
+        login_user(user)
+
+        return redirect('/dashboard')
 
     return render_template('login.html')
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    flash("Please login first")
+    return redirect('/login')
 
 
 # ================= MEMBER DASHBOARD =================
@@ -150,13 +161,13 @@ def login():
 @login_required
 def dashboard():
 
-    total_tasks = Task.query.filter_by(user_id=current_user.id).count()
-    completed_tasks = Task.query.filter_by(user_id=current_user.id, status='Completed').count()
-    pending_tasks = Task.query.filter_by(user_id=current_user.id, status='Pending').count()
-    projects_count = Project.query.filter_by(user_id=current_user.id).count()
+    total_tasks = Task.query.filter_by(user_id=current_user.id).count() or 0
+    completed_tasks = Task.query.filter_by(user_id=current_user.id, status='Completed').count() or 0
+    pending_tasks = Task.query.filter_by(user_id=current_user.id, status='Pending').count() or 0
+    projects_count = Project.query.filter_by(user_id=current_user.id).count() or 0
 
-    tasks = Task.query.filter_by(user_id=current_user.id).all()
-    projects = Project.query.filter_by(user_id=current_user.id).all()
+    tasks = Task.query.filter_by(user_id=current_user.id).all() or []
+    projects = Project.query.filter_by(user_id=current_user.id).all() or []
 
     return render_template(
         'dashboard.html',
@@ -167,7 +178,6 @@ def dashboard():
         tasks=tasks,
         projects=projects
     )
-
 
 # ================= PROJECT DETAIL =================
 @app.route('/project/<int:project_id>')
