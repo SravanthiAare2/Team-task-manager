@@ -33,6 +33,9 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 db = SQLAlchemy(app)
+with app.app_context():
+    db.create_all()
+    
 # ================= ADMIN =================
 ALLOWED_ADMIN_EMAILS = ["admin@gmail.com", "admin1@gmail.com"]
 
@@ -161,23 +164,18 @@ def unauthorized():
 @login_required
 def dashboard():
 
-    try:
-        tasks = Task.query.filter_by(user_id=current_user.id).all()
-        projects = Project.query.filter_by(user_id=current_user.id).all()
+    tasks = Task.query.filter_by(user_id=current_user.id).all()
+    projects = Project.query.filter_by(user_id=current_user.id).all()
 
-        return render_template(
-            'dashboard.html',
-            tasks=tasks,
-            projects=projects,
-            total_tasks=len(tasks),
-            completed_tasks=len([t for t in tasks if t.status == "Completed"]),
-            pending_tasks=len([t for t in tasks if t.status == "Pending"]),
-            projects_count=len(projects)
-        )
-
-    except Exception as e:
-        print("Dashboard error:", e)
-        return "Dashboard error"
+    return render_template(
+        'dashboard.html',
+        tasks=tasks,
+        projects=projects,
+        total_tasks=len(tasks),
+        completed_tasks=len([t for t in tasks if t.status == "Completed"]),
+        pending_tasks=len([t for t in tasks if t.status == "Pending"]),
+        projects_count=len(projects)
+    )
 # ================= PROJECT DETAIL =================
 @app.route('/project/<int:project_id>')
 @login_required
