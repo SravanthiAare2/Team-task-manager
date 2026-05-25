@@ -14,6 +14,7 @@ import os
 
 app = Flask(__name__)
 
+
 # ================= CONFIG =================
 app.config['SECRET_KEY'] = 'team-task-manager-secret'
 
