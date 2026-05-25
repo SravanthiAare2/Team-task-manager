@@ -161,13 +161,13 @@ def unauthorized():
 @login_required
 def dashboard():
 
-    total_tasks = Task.query.filter_by(user_id=current_user.id).count() or 0
-    completed_tasks = Task.query.filter_by(user_id=current_user.id, status='Completed').count() or 0
-    pending_tasks = Task.query.filter_by(user_id=current_user.id, status='Pending').count() or 0
-    projects_count = Project.query.filter_by(user_id=current_user.id).count() or 0
-
     tasks = Task.query.filter_by(user_id=current_user.id).all() or []
     projects = Project.query.filter_by(user_id=current_user.id).all() or []
+
+    total_tasks = len(tasks)
+    completed_tasks = len([t for t in tasks if t.status == "Completed"])
+    pending_tasks = len([t for t in tasks if t.status == "Pending"])
+    projects_count = len(projects)
 
     return render_template(
         'dashboard.html',
@@ -178,7 +178,6 @@ def dashboard():
         tasks=tasks,
         projects=projects
     )
-
 # ================= PROJECT DETAIL =================
 @app.route('/project/<int:project_id>')
 @login_required
@@ -236,15 +235,16 @@ def admin_dashboard():
         flash("Access denied")
         return redirect('/dashboard')
 
-    users = User.query.all()
-    projects = db.session.query(Project, User.email).join(User, Project.user_id == User.id).all()
-    tasks = db.session.query(Task, User.email).join(User, Task.user_id == User.id).all()
+    users = User.query.all() or []
 
-    completed_count = sum(1 for t, e in tasks if t.status == "Completed")
-    pending_count = sum(1 for t, e in tasks if t.status == "Pending")
+    projects = Project.query.all() or []
+    tasks = Task.query.all() or []
 
-    admin_count = sum(1 for u in users if u.role == "admin")
-    member_count = sum(1 for u in users if u.role == "member")
+    completed_count = len([t for t in tasks if t.status == "Completed"])
+    pending_count = len([t for t in tasks if t.status == "Pending"])
+
+    admin_count = len([u for u in users if u.role == "admin"])
+    member_count = len([u for u in users if u.role == "member"])
 
     return render_template(
         'admin_dashboard.html',
