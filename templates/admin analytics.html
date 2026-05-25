@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Pro Analytics SaaS</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        body {
+            background: #f4f6f9;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            height: 100vh;
+            width: 240px;
+            position: fixed;
+            background: #0f172a;
+            color: white;
+            padding: 20px;
+        }
+
+        .sidebar a {
+            display: block;
+            color: white;
+            padding: 10px;
+            text-decoration: none;
+            margin-top: 8px;
+            border-radius: 8px;
+        }
+
+        .sidebar a:hover {
+            background: #1e293b;
+        }
+
+        /* MAIN */
+        .main {
+            margin-left: 260px;
+            padding: 20px;
+        }
+
+        .card-box {
+            border-radius: 14px;
+            border: none;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .insight-card {
+            border-radius: 12px;
+            padding: 15px;
+            background: white;
+            border-left: 5px solid #6366f1;
+        }
+
+        .section-title {
+            margin-top: 30px;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <h4>⚡ Admin SaaS</h4>
+
+    <a href="#overview">📊 Overview</a>
+    <a href="#analytics">📈 Analytics</a>
+    <a href="#users">👤 Users</a>
+    <a href="#projects">📁 Projects</a>
+    <a href="#tasks">📋 Tasks</a>
+    <a href="/logout">🚪 Logout</a>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+    <!-- HEADER -->
+    <div class="topbar">
+        <h2>Admin Analytics Dashboard 🚀</h2>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div id="overview" class="row mt-4">
+
+        <div class="col-md-3">
+            <div class="card bg-primary text-white p-3 card-box">
+                <h6>Total Users</h6>
+                <h3>{{ users|length }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-success text-white p-3 card-box">
+                <h6>Total Projects</h6>
+                <h3>{{ projects|length }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-warning text-white p-3 card-box">
+                <h6>Total Tasks</h6>
+                <h3>{{ tasks|length }}</h3>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card bg-danger text-white p-3 card-box">
+                <h6>Members</h6>
+                <h3>{{ member_count }}</h3>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- INSIGHTS -->
+    <div class="section-title">
+        <h4>📌 Key Insights</h4>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-4">
+            <div class="insight-card">
+                <h6>🔥 Productivity Insight</h6>
+                <p>
+                    {{ completed_count }} tasks completed out of {{ tasks|length }} total tasks.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="insight-card">
+                <h6>👥 User Insight</h6>
+                <p>
+                    {{ member_count }} active members are working on projects.
+                </p>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="insight-card">
+                <h6>📁 Project Insight</h6>
+                <p>
+                    {{ projects|length }} total projects are currently tracked in the system.
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- CHARTS -->
+    <div id="analytics" class="section-title">
+        <h4>📊 Analytics</h4>
+    </div>
+
+    <div class="row">
+
+        <div class="col-md-6">
+            <div class="card p-3 card-box">
+                <h5>Task Performance</h5>
+                <canvas id="taskChart"></canvas>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card p-3 card-box">
+                <h5>User Roles Distribution</h5>
+                <canvas id="userChart"></canvas>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- USERS -->
+    <div id="users" class="section-title">
+        <h4>👤 Users</h4>
+    </div>
+
+    <div class="card p-3 card-box">
+        <table class="table table-striped">
+            <tr>
+                <th>Username</th>
+                <th>Email</th>
+                <th>Role</th>
+            </tr>
+
+            {% for user in users %}
+            <tr>
+                <td>{{ user.username }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.role }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- PROJECTS -->
+    <div id="projects" class="section-title">
+        <h4>📁 Projects</h4>
+    </div>
+
+    <div class="card p-3 card-box">
+        <table class="table table-bordered">
+            <tr>
+                <th>Title</th>
+                <th>Description</th>
+                <th>User Email</th>
+            </tr>
+
+            {% for project, email in projects %}
+            <tr>
+                <td>{{ project.title }}</td>
+                <td>{{ project.description }}</td>
+                <td>{{ email }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <!-- TASKS -->
+    <div id="tasks" class="section-title">
+        <h4>📋 Tasks</h4>
+    </div>
+
+    <div class="card p-3 card-box">
+        <table class="table table-hover">
+            <tr>
+                <th>Title</th>
+                <th>Status</th>
+                <th>User Email</th>
+            </tr>
+
+            {% for task, email in tasks %}
+            <tr>
+                <td>{{ task.title }}</td>
+                <td>
+                    {% if task.status == "Completed" %}
+                        <span class="text-success">Completed</span>
+                    {% else %}
+                        <span class="text-warning">Pending</span>
+                    {% endif %}
+                </td>
+                <td>{{ email }}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+</div>
+
+<!-- CHARTS SCRIPT -->
+<script>
+function toggleDark() {
+    document.body.classList.toggle("dark");
+}
+
+const completedCount = JSON.parse('{{ completed_count | tojson }}');
+const pendingCount = JSON.parse('{{ pending_count | tojson }}');
+const adminCount = JSON.parse('{{ admin_count | tojson }}');
+const memberCount = JSON.parse('{{ member_count | tojson }}');
+
+new Chart(document.getElementById("taskChart"), {
+    type: 'pie',
+    data: {
+        labels: ['Completed', 'Pending'],
+        datasets: [{
+            data: [completedCount, pendingCount],
+            backgroundColor: ['#22c55e', '#f59e0b']
+        }]
+    }
+});
+
+new Chart(document.getElementById("userChart"), {
+    type: 'bar',
+    data: {
+        labels: ['Admins', 'Members'],
+        datasets: [{
+            data: [adminCount, memberCount],
+            backgroundColor: ['#3b82f6', '#6b7280']
+        }]
+    }
+});
+</script>
+
+</body>
+</html>

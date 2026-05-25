@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-body">
+
+<div class="auth-container">
+
+    <a href="/" class="back-btn">← Back</a>
+
+    <h2>Create Account</h2>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash-message">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST">
+
+        <input type="text" name="username" placeholder="Username" required>
+
+        <input type="email" name="email" placeholder="Email" required>
+
+        <input type="password" name="password" placeholder="Create Password" required>
+
+        <input type="password" name="confirm_password" placeholder="Confirm Password" required>
+
+        <!-- FIXED ROLE VALUES (IMPORTANT) -->
+        <select name="role">
+            <option value="admin">Admin</option>
+            <option value="member">Member</option>
+        </select>
+
+        <label class="checkbox-label">
+            <input type="checkbox" required>
+            All details provided are correct.
+        </label>
+
+        <button type="submit">Register</button>
+
+    </form>
+
+    <p>
+        Already have an account?
+        <a href="/login">Login</a>
+    </p>
+
+</div>
+
+</body>
+</html>
